@@ -25,12 +25,9 @@ Current scope:     <a href="../../index.html">all classes</a>
 <h1>Coverage Summary for Class: FujitsuTaskApplication (kkadak.fujitsutask)</h1>
 
 <table class="coverageStats">
+
 <tr>
   <th class="name">Class</th>
-<th class="coverageStat 
-">
-  Class, %
-</th>
 <th class="coverageStat 
 ">
   Method, %
@@ -44,30 +41,49 @@ Current scope:     <a href="../../index.html">all classes</a>
   <td class="name">FujitsuTaskApplication</td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    80%
   </span>
   <span class="absValue">
-    (0/1)
+    (4/5)
   </span>
 </td>
 <td class="coverageStat">
   <span class="percent">
-    0%
+    83.3%
   </span>
   <span class="absValue">
-    (0/5)
-  </span>
-</td>
-<td class="coverageStat">
-  <span class="percent">
-    0%
-  </span>
-  <span class="absValue">
-    (0/6)
+    (5/6)
   </span>
 </td>
 </tr>
-
+  <tr>
+    <td class="name">FujitsuTaskApplication$$SpringCGLIB$$0</td>
+  </tr>
+  <tr>
+    <td class="name">FujitsuTaskApplication$$SpringCGLIB$$FastClass$$0</td>
+  </tr>
+  <tr>
+    <td class="name">FujitsuTaskApplication$$SpringCGLIB$$FastClass$$1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    80%
+  </span>
+  <span class="absValue">
+    (4/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+</tr>
 </table>
 
 <br/>
@@ -88,7 +104,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;
 &nbsp;@SpringBootApplication
 &nbsp;@EnableScheduling
-<b class="nc">&nbsp;public class FujitsuTaskApplication {</b>
+<b class="fc">&nbsp;public class FujitsuTaskApplication {</b>
 &nbsp;
 &nbsp;    /**
 &nbsp;     * Control flow entry point
@@ -107,7 +123,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;     */
 &nbsp;    @Bean
 &nbsp;    public ThreadPoolTaskScheduler taskScheduler() {
-<b class="nc">&nbsp;        return new ThreadPoolTaskScheduler();</b>
+<b class="fc">&nbsp;        return new ThreadPoolTaskScheduler();</b>
 &nbsp;    }
 &nbsp;
 &nbsp;    /**
@@ -116,9 +132,9 @@ Current scope:     <a href="../../index.html">all classes</a>
 &nbsp;     */
 &nbsp;    @Bean
 &nbsp;    public ApplicationRunner initialWeatherDataFetch(WeatherDataImporter weatherDataImporter) {
-<b class="nc">&nbsp;        return args -&gt; {</b>
-<b class="nc">&nbsp;            weatherDataImporter.fetchAndSave();</b>
-<b class="nc">&nbsp;            weatherDataImporter.scheduleFetch();</b>
+<b class="fc">&nbsp;        return args -&gt; {</b>
+<b class="fc">&nbsp;            weatherDataImporter.fetchAndSave();</b>
+<b class="fc">&nbsp;            weatherDataImporter.scheduleFetch();</b>
 &nbsp;        };
 &nbsp;    }
 &nbsp;}
@@ -145,7 +161,7 @@ Current scope:     <a href="../../index.html">all classes</a>
 
 <div class="footer">
     
-    <div style="float:right;">generated on 2024-03-17 14:17</div>
+    <div style="float:right;">generated on 2024-03-17 14:49</div>
 </div>
 </body>
 </html>
