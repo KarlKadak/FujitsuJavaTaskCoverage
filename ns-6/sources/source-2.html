@@ -1,0 +1,109 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DeliveryService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kkadak.fujitsutask.service</a>
+</div>
+
+<h1>Coverage Summary for Class: DeliveryService (kkadak.fujitsutask.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">DeliveryService</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kkadak.fujitsutask.service;
+&nbsp;
+&nbsp;import kkadak.fujitsutask.enums.City;
+&nbsp;import kkadak.fujitsutask.enums.VehicleType;
+&nbsp;import kkadak.fujitsutask.exceptions.DeliveryFeeCalculationException;
+&nbsp;
+&nbsp;/**
+&nbsp; * Provides methods for calculating delivery fees
+&nbsp; * &lt;p&gt;
+&nbsp; * Defines method {@link #getDeliveryFee(City, VehicleType)}
+&nbsp; * for getting the total delivery fee with the most recent weather data
+&nbsp; * and method {@link #getDeliveryFee(City, VehicleType, long)}
+&nbsp; * for getting the total delivery fee for a specified time in the past (measured in seconds past UTC epoch)
+&nbsp; */
+&nbsp;public interface DeliveryService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates the current delivery fee based on the given city and vehicle type
+&nbsp;     * &lt;p&gt;
+&nbsp;     * In case of error throws a {@link kkadak.fujitsutask.exceptions.DeliveryFeeCalculationException}
+&nbsp;     *
+&nbsp;     * @param city        the {@link kkadak.fujitsutask.enums.City} for delivery
+&nbsp;     * @param vehicleType the {@link kkadak.fujitsutask.enums.VehicleType} used for the delivery
+&nbsp;     * @return the total delivery fee
+&nbsp;     * @throws DeliveryFeeCalculationException in case of error
+&nbsp;     */
+&nbsp;    double getDeliveryFee(City city, VehicleType vehicleType) throws DeliveryFeeCalculationException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Calculates the current delivery fee based on the given city and vehicle type for the given time
+&nbsp;     * &lt;p&gt;
+&nbsp;     * In case of error throws a {@link kkadak.fujitsutask.exceptions.DeliveryFeeCalculationException}
+&nbsp;     *
+&nbsp;     * @param city        the {@link kkadak.fujitsutask.enums.City} for delivery
+&nbsp;     * @param vehicleType the {@link kkadak.fujitsutask.enums.VehicleType} used for the delivery
+&nbsp;     * @param timestamp   the timestamp for the calculation data (measured in seconds past UTC epoch)
+&nbsp;     * @return the total delivery fee
+&nbsp;     * @throws DeliveryFeeCalculationException in case of error
+&nbsp;     */
+&nbsp;    double getDeliveryFee(City city, VehicleType vehicleType, long timestamp) throws DeliveryFeeCalculationException;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-03-17 14:17</div>
+</div>
+</body>
+</html>

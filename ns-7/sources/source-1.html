@@ -1,0 +1,259 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > StringEnumTranslator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kkadak.fujitsutask.translators</a>
+</div>
+
+<h1>Coverage Summary for Class: StringEnumTranslator (kkadak.fujitsutask.translators)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StringEnumTranslator</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.1%
+  </span>
+  <span class="absValue">
+    (34/35)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">StringEnumTranslator$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.3%
+  </span>
+  <span class="absValue">
+    (36/37)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kkadak.fujitsutask.translators;
+&nbsp;
+&nbsp;import kkadak.fujitsutask.enums.City;
+&nbsp;import kkadak.fujitsutask.enums.ExtraFeeRuleMetric;
+&nbsp;import kkadak.fujitsutask.enums.ExtraFeeRuleValueType;
+&nbsp;import kkadak.fujitsutask.enums.VehicleType;
+&nbsp;
+&nbsp;/**
+&nbsp; * Used to translate between Strings and
+&nbsp; * {@link kkadak.fujitsutask.enums.City} or {@link kkadak.fujitsutask.enums.VehicleType} enums
+&nbsp; *
+&nbsp; * @see kkadak.fujitsutask.enums.City
+&nbsp; * @see kkadak.fujitsutask.enums.VehicleType
+&nbsp; */
+<b class="nc">&nbsp;public class StringEnumTranslator {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used to translate user input String to {@link kkadak.fujitsutask.enums.City}
+&nbsp;     *
+&nbsp;     * @param cityStr user input city name String
+&nbsp;     *                (any variation of &quot;Tallinn&quot;, &quot;TLN&quot;, &quot;Tartu&quot;, &quot;TRT&quot;, &quot;Pärnu&quot;, &quot;Parnu&quot;, &quot;PRN&quot;)
+&nbsp;     * @return respective {@link kkadak.fujitsutask.enums.City} in case of success
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@link kkadak.fujitsutask.enums.City}.UNKNOWN in case of error
+&nbsp;     */
+&nbsp;    public static City getCityFromStr(String cityStr) {
+&nbsp;        // Input validation
+<b class="fc">&nbsp;        if (cityStr == null) return City.UNKNOWN;</b>
+&nbsp;
+<b class="fc">&nbsp;        return switch (cityStr.toLowerCase()) {</b>
+<b class="fc">&nbsp;            case &quot;tallinn&quot;, &quot;tln&quot; -&gt; City.TALLINN;</b>
+<b class="fc">&nbsp;            case &quot;tartu&quot;, &quot;trt&quot; -&gt; City.TARTU;</b>
+<b class="fc">&nbsp;            case &quot;pärnu&quot;, &quot;parnu&quot;, &quot;prn&quot; -&gt; City.PARNU;</b>
+<b class="fc">&nbsp;            default -&gt; City.UNKNOWN;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used to translate {@link kkadak.fujitsutask.enums.City} to human-readable String of the city&#39;s name
+&nbsp;     *
+&nbsp;     * @param city {@link kkadak.fujitsutask.enums.City} enum to be translated
+&nbsp;     * @return human-readable String of the city&#39;s name
+&nbsp;     * @throws IllegalArgumentException in case of undefined translation
+&nbsp;     */
+&nbsp;    public static String getStrFromCity(City city) {
+<b class="fc">&nbsp;        return switch (city) {</b>
+<b class="fc">&nbsp;            case TALLINN -&gt; &quot;Tallinn&quot;;</b>
+<b class="fc">&nbsp;            case TARTU -&gt; &quot;Tartu&quot;;</b>
+<b class="fc">&nbsp;            case PARNU -&gt; &quot;Pärnu&quot;;</b>
+<b class="fc">&nbsp;            default -&gt; throw new IllegalArgumentException();</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used to translate user input String to {@link kkadak.fujitsutask.enums.VehicleType}
+&nbsp;     *
+&nbsp;     * @param vehicleTypeStr user input city name String (any variation of &quot;car&quot;, &quot;scooter&quot;, &quot;bike&quot;)
+&nbsp;     * @return respective {@link kkadak.fujitsutask.enums.VehicleType} in case of success
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@link kkadak.fujitsutask.enums.VehicleType}.UNKNOWN in case of error
+&nbsp;     */
+&nbsp;    public static VehicleType getVehicleTypeFromStr(String vehicleTypeStr) {
+&nbsp;        // Input validation
+<b class="fc">&nbsp;        if (vehicleTypeStr == null) return VehicleType.UNKNOWN;</b>
+&nbsp;
+<b class="fc">&nbsp;        return switch (vehicleTypeStr.toLowerCase()) {</b>
+<b class="fc">&nbsp;            case &quot;car&quot; -&gt; VehicleType.CAR;</b>
+<b class="fc">&nbsp;            case &quot;scooter&quot; -&gt; VehicleType.SCOOTER;</b>
+<b class="fc">&nbsp;            case &quot;bike&quot; -&gt; VehicleType.BIKE;</b>
+<b class="fc">&nbsp;            default -&gt; VehicleType.UNKNOWN;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used to translate {@link kkadak.fujitsutask.enums.VehicleType} to human-readable String of the vehicle type
+&nbsp;     *
+&nbsp;     * @param vehicleType {@link kkadak.fujitsutask.enums.VehicleType} enum to be translated
+&nbsp;     * @return human-readable String of the vehicle type
+&nbsp;     * @throws IllegalArgumentException in case of undefined translation
+&nbsp;     */
+&nbsp;    public static String getStrFromVehicleType(VehicleType vehicleType) {
+<b class="fc">&nbsp;        return switch (vehicleType) {</b>
+<b class="fc">&nbsp;            case CAR -&gt; &quot;car&quot;;</b>
+<b class="fc">&nbsp;            case SCOOTER -&gt; &quot;scooter&quot;;</b>
+<b class="fc">&nbsp;            case BIKE -&gt; &quot;bike&quot;;</b>
+<b class="fc">&nbsp;            default -&gt; throw new IllegalArgumentException();</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used to translate user input rule value type String to {@link kkadak.fujitsutask.enums.ExtraFeeRuleValueType}
+&nbsp;     *
+&nbsp;     * @param valueTypeStr user input rule value type String (any variation of &quot;from&quot;, &quot;until&quot;, &quot;phenomenon&quot;)
+&nbsp;     * @return respective {@link kkadak.fujitsutask.enums.ExtraFeeRuleValueType} in case of success
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@link kkadak.fujitsutask.enums.ExtraFeeRuleValueType}.UNKNOWN in case of error
+&nbsp;     */
+&nbsp;    public static ExtraFeeRuleValueType getValueTypeFromStr(String valueTypeStr) {
+&nbsp;        // Input validation
+<b class="fc">&nbsp;        if (valueTypeStr == null) return ExtraFeeRuleValueType.UNKNOWN;</b>
+&nbsp;
+<b class="fc">&nbsp;        return switch (valueTypeStr.toLowerCase()) {</b>
+<b class="fc">&nbsp;            case &quot;from&quot; -&gt; ExtraFeeRuleValueType.FROM;</b>
+<b class="fc">&nbsp;            case &quot;until&quot; -&gt; ExtraFeeRuleValueType.UNTIL;</b>
+<b class="fc">&nbsp;            case &quot;phenomenon&quot; -&gt; ExtraFeeRuleValueType.PHENOMENON;</b>
+<b class="fc">&nbsp;            default -&gt; ExtraFeeRuleValueType.UNKNOWN;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Used to translate user input rule metric String to {@link kkadak.fujitsutask.enums.ExtraFeeRuleMetric}
+&nbsp;     *
+&nbsp;     * @param metricStr user input rule metric String (any variation of &quot;airtemp&quot;, &quot;windspeed&quot;, &quot;phenomenon&quot;)
+&nbsp;     * @return respective {@link kkadak.fujitsutask.enums.ExtraFeeRuleMetric} in case of success
+&nbsp;     * &lt;p&gt;
+&nbsp;     * {@link kkadak.fujitsutask.enums.ExtraFeeRuleMetric}.UNKNOWN in case of error
+&nbsp;     */
+&nbsp;    public static ExtraFeeRuleMetric getMetricFromStr(String metricStr) {
+&nbsp;        // Input validation
+<b class="fc">&nbsp;        if (metricStr == null) return ExtraFeeRuleMetric.UNKNOWN;</b>
+&nbsp;
+<b class="fc">&nbsp;        return switch (metricStr.toLowerCase()) {</b>
+<b class="fc">&nbsp;            case &quot;airtemp&quot; -&gt; ExtraFeeRuleMetric.AIRTEMP;</b>
+<b class="fc">&nbsp;            case &quot;windspeed&quot; -&gt; ExtraFeeRuleMetric.WINDSPEED;</b>
+<b class="fc">&nbsp;            case &quot;phenomenon&quot; -&gt; ExtraFeeRuleMetric.PHENOMENON;</b>
+<b class="fc">&nbsp;            default -&gt; ExtraFeeRuleMetric.UNKNOWN;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-03-17 14:17</div>
+</div>
+</body>
+</html>

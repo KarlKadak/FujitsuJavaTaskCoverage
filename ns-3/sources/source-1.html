@@ -1,0 +1,229 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > WeatherDataImporter</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kkadak.fujitsutask.cron</a>
+</div>
+
+<h1>Coverage Summary for Class: WeatherDataImporter (kkadak.fujitsutask.cron)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WeatherDataImporter</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.2%
+  </span>
+  <span class="absValue">
+    (37/41)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kkadak.fujitsutask.cron;
+&nbsp;
+&nbsp;import kkadak.fujitsutask.model.WeatherData;
+&nbsp;import kkadak.fujitsutask.repository.WeatherDataRepository;
+&nbsp;import kkadak.fujitsutask.translators.WeatherStationTranslator;
+&nbsp;import org.springframework.beans.factory.annotation.Value;
+&nbsp;import org.springframework.context.annotation.PropertySource;
+&nbsp;import org.springframework.scheduling.TaskScheduler;
+&nbsp;import org.springframework.scheduling.support.CronTrigger;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.w3c.dom.Document;
+&nbsp;import org.w3c.dom.Element;
+&nbsp;import org.w3c.dom.Node;
+&nbsp;import org.w3c.dom.NodeList;
+&nbsp;
+&nbsp;import javax.xml.parsers.DocumentBuilder;
+&nbsp;import javax.xml.parsers.DocumentBuilderFactory;
+&nbsp;import java.io.InputStream;
+&nbsp;import java.net.URL;
+&nbsp;import java.net.URLConnection;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Class used for importing weather data to the WeatherData table
+&nbsp; */
+&nbsp;@Component
+&nbsp;@PropertySource(&quot;classpath:application.properties&quot;)
+&nbsp;public class WeatherDataImporter {
+&nbsp;    private final WeatherDataRepository repository;
+&nbsp;    private final TaskScheduler taskScheduler;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cron expression gathered from application.properties based on which {@link #taskScheduler} runs
+&nbsp;     * {@link #fetchAndSave()}
+&nbsp;     */
+&nbsp;    @Value(&quot;${cron.expression}&quot;)
+&nbsp;    private String cronExpression;
+&nbsp;
+<b class="fc">&nbsp;    public WeatherDataImporter(WeatherDataRepository repository, TaskScheduler taskScheduler) {</b>
+<b class="fc">&nbsp;        this.repository = repository;</b>
+<b class="fc">&nbsp;        this.taskScheduler = taskScheduler;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Schedules the {@link #fetchAndSave()} method to run using the cron expression specified in application.properties
+&nbsp;     */
+&nbsp;    public void scheduleFetch() {
+<b class="fc">&nbsp;        taskScheduler.schedule(this::fetchAndSave, new CronTrigger(cronExpression));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fetches the data from
+&nbsp;     * &lt;a href=&quot;https://www.ilmateenistus.ee/teenused/ilmainfo/eesti-vaatlusandmed-xml/&quot;&gt;Estonian Environment Agency&lt;/a&gt;
+&nbsp;     * and saves it to the database for the stations declared in
+&nbsp;     * {@link kkadak.fujitsutask.translators.WeatherStationTranslator}
+&nbsp;     * &lt;p&gt;
+&nbsp;     * Configured to automatically run using cron expression in application.properties file
+&nbsp;     *
+&nbsp;     * @see kkadak.fujitsutask.translators.WeatherStationTranslator
+&nbsp;     */
+&nbsp;    public void fetchAndSave() {
+<b class="fc">&nbsp;        final List&lt;Integer&gt; stationWmosToFetch = WeatherStationTranslator.getStationWmosToFetch();</b>
+<b class="fc">&nbsp;        List&lt;WeatherData&gt; fetchedData = new ArrayList&lt;&gt;();</b>
+&nbsp;        Document doc;
+&nbsp;
+&nbsp;        // Fetches the XML from the URL and builds a Document object from it
+&nbsp;        // In case of Exception, prints it to the console and returns
+&nbsp;        try {
+<b class="fc">&nbsp;            URL url = new URL(&quot;https://www.ilmateenistus.ee/ilma_andmed/xml/observations.php&quot;);</b>
+<b class="fc">&nbsp;            URLConnection connection = url.openConnection();</b>
+<b class="fc">&nbsp;            InputStream inputStream = connection.getInputStream();</b>
+&nbsp;
+<b class="fc">&nbsp;            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();</b>
+<b class="fc">&nbsp;            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();</b>
+<b class="fc">&nbsp;            doc = dBuilder.parse(inputStream);</b>
+<b class="fc">&nbsp;            doc.getDocumentElement().normalize();</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            System.out.printf(&quot;Exception thrown while fetching data: %s%n&quot;, e.getMessage());</b>
+&nbsp;            return;
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // Attempt to retrieve the &#39;timestamp&#39; attribute from the XML, in case of failure abort the function and return
+&nbsp;        long timestamp;
+&nbsp;        try {
+<b class="fc">&nbsp;            timestamp = Long.parseLong(doc.getDocumentElement().getAttribute(&quot;timestamp&quot;));</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+&nbsp;            return;
+<b class="fc">&nbsp;        }</b>
+&nbsp;
+&nbsp;        // Build a NodeList from the &#39;station&#39; elements
+<b class="fc">&nbsp;        NodeList nList = doc.getElementsByTagName(&quot;station&quot;);</b>
+&nbsp;
+&nbsp;        // Iterate over the Nodes in the NodeList
+&nbsp;        // In case the WMO code of current Node is present in stationWmosToFetch, attempt to:
+&nbsp;        // - parse the elements of the Node
+&nbsp;        // - build a WeatherData object with the metrics and timestamp from XML
+&nbsp;        // - add the new object to the database
+&nbsp;        // In case an Exception is thrown continue to the next Node
+<b class="fc">&nbsp;        for (int i = 0, length = nList.getLength(); i &lt; length; i++) {</b>
+&nbsp;            try {
+<b class="fc">&nbsp;                Node nNode = nList.item(i);</b>
+<b class="fc">&nbsp;                if (nNode.getNodeType() != Node.ELEMENT_NODE) continue;</b>
+<b class="fc">&nbsp;                Element eElement = (Element) nNode;</b>
+<b class="fc">&nbsp;                String parsedWmoStr = eElement.getElementsByTagName(&quot;wmocode&quot;).item(0).getTextContent();</b>
+<b class="fc">&nbsp;                if (parsedWmoStr.isEmpty()) continue;</b>
+<b class="fc">&nbsp;                Integer parsedWmo = Integer.parseInt(parsedWmoStr);</b>
+<b class="fc">&nbsp;                if (!stationWmosToFetch.contains(parsedWmo)) continue;</b>
+<b class="fc">&nbsp;                fetchedData.add(new WeatherData(Integer.parseInt(eElement.getElementsByTagName(&quot;wmocode&quot;).item(0)</b>
+<b class="fc">&nbsp;                            .getTextContent()),</b>
+<b class="fc">&nbsp;                        eElement.getElementsByTagName(&quot;name&quot;).item(0)</b>
+<b class="fc">&nbsp;                                .getTextContent(),</b>
+<b class="fc">&nbsp;                        Double.parseDouble(eElement.getElementsByTagName(&quot;airtemperature&quot;).item(0)</b>
+<b class="fc">&nbsp;                                .getTextContent()),</b>
+<b class="fc">&nbsp;                        Double.parseDouble(eElement.getElementsByTagName(&quot;windspeed&quot;).item(0)</b>
+<b class="fc">&nbsp;                                .getTextContent()),</b>
+<b class="fc">&nbsp;                        eElement.getElementsByTagName(&quot;phenomenon&quot;).item(0)</b>
+<b class="fc">&nbsp;                                .getTextContent(),</b>
+&nbsp;                        timestamp));
+<b class="nc">&nbsp;            } catch (Exception ignored) {</b>
+<b class="fc">&nbsp;            }</b>
+&nbsp;        }
+<b class="fc">&nbsp;        repository.saveAll(fetchedData);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-03-17 14:17</div>
+</div>
+</body>
+</html>

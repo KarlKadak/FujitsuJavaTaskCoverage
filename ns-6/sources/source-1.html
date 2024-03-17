@@ -1,0 +1,277 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DeliveryServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kkadak.fujitsutask.service</a>
+</div>
+
+<h1>Coverage Summary for Class: DeliveryServiceImpl (kkadak.fujitsutask.service)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DeliveryServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.3%
+  </span>
+  <span class="absValue">
+    (56/62)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kkadak.fujitsutask.service;
+&nbsp;
+&nbsp;import kkadak.fujitsutask.enums.City;
+&nbsp;import kkadak.fujitsutask.enums.ExtraFeeRuleMetric;
+&nbsp;import kkadak.fujitsutask.enums.ExtraFeeRuleValueType;
+&nbsp;import kkadak.fujitsutask.enums.VehicleType;
+&nbsp;import kkadak.fujitsutask.exceptions.DeliveryFeeCalculationException;
+&nbsp;import kkadak.fujitsutask.model.BaseFeeRule;
+&nbsp;import kkadak.fujitsutask.model.ExtraFeeRule;
+&nbsp;import kkadak.fujitsutask.model.WeatherData;
+&nbsp;import kkadak.fujitsutask.repository.BaseFeeRuleRepository;
+&nbsp;import kkadak.fujitsutask.repository.ExtraFeeRuleRepository;
+&nbsp;import kkadak.fujitsutask.repository.WeatherDataRepository;
+&nbsp;import kkadak.fujitsutask.translators.WeatherStationTranslator;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.Comparator;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation of the {@link kkadak.fujitsutask.service.DeliveryService} interface
+&nbsp; */
+&nbsp;@Service
+&nbsp;public class DeliveryServiceImpl implements DeliveryService {
+&nbsp;    private final WeatherDataRepository weatherDataRepository;
+&nbsp;    private final BaseFeeRuleRepository baseFeeRuleRepository;
+&nbsp;    private final ExtraFeeRuleRepository extraFeeRuleRepository;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public DeliveryServiceImpl(WeatherDataRepository weatherDataRepository,
+&nbsp;                               BaseFeeRuleRepository baseFeeRuleRepository,
+<b class="fc">&nbsp;                               ExtraFeeRuleRepository extraFeeRuleRepository) {</b>
+<b class="fc">&nbsp;        this.weatherDataRepository = weatherDataRepository;</b>
+<b class="fc">&nbsp;        this.baseFeeRuleRepository = baseFeeRuleRepository;</b>
+<b class="fc">&nbsp;        this.extraFeeRuleRepository = extraFeeRuleRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public double getDeliveryFee(City city, VehicleType vehicleType) throws DeliveryFeeCalculationException {
+<b class="fc">&nbsp;        return getBaseFee(city, vehicleType, null) + getExtraFee(city, vehicleType, null);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public double getDeliveryFee(City city, VehicleType vehicleType, long timestamp)
+&nbsp;            throws DeliveryFeeCalculationException {
+<b class="fc">&nbsp;        return getBaseFee(city, vehicleType, timestamp) + getExtraFee(city, vehicleType, timestamp);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the base fee for currently set rules (if timestamp is null) or rules active at timestamp (if set)
+&nbsp;     * &lt;p&gt;
+&nbsp;     * In case of error throws a {@link kkadak.fujitsutask.exceptions.DeliveryFeeCalculationException}
+&nbsp;     *
+&nbsp;     * @param city        the {@link kkadak.fujitsutask.enums.City} for delivery
+&nbsp;     * @param vehicleType the {@link kkadak.fujitsutask.enums.VehicleType} used for the delivery
+&nbsp;     * @param timestamp   the timestamp for the calculation data (measured in seconds past UTC epoch) or null
+&nbsp;     * @return the total delivery fee from base fee rules
+&nbsp;     * @throws DeliveryFeeCalculationException in case of error
+&nbsp;     */
+&nbsp;    private double getBaseFee(City city, VehicleType vehicleType, Long timestamp)
+&nbsp;            throws DeliveryFeeCalculationException {
+&nbsp;        Optional&lt;BaseFeeRule&gt; rule;
+<b class="fc">&nbsp;        if (timestamp == null)</b>
+<b class="fc">&nbsp;            rule = baseFeeRuleRepository.findTopByCityAndVehicleTypeOrderByValidFromTimestampDesc(city, vehicleType);</b>
+&nbsp;        else
+<b class="fc">&nbsp;            rule = baseFeeRuleRepository</b>
+<b class="fc">&nbsp;                    .findTopByCityAndVehicleTypeAndValidFromTimestampLessThanEqualOrderByValidFromTimestampDesc(city,</b>
+<b class="fc">&nbsp;                            vehicleType, timestamp);</b>
+&nbsp;
+&nbsp;        // Handle vehicle not allowed
+<b class="fc">&nbsp;        if (rule.isEmpty() || rule.get().getFeeAmount() == null)</b>
+<b class="fc">&nbsp;            throw new DeliveryFeeCalculationException(&quot;Use of selected vehicle is not allowed in specified city&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        return rule.get().getFeeAmount();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Returns the extra fee for currently set rules (if timestamp is null) or rules active at timestamp (if set)
+&nbsp;     * &lt;p&gt;
+&nbsp;     * In case of error throws a {@link kkadak.fujitsutask.exceptions.DeliveryFeeCalculationException}
+&nbsp;     *
+&nbsp;     * @param city        the {@link kkadak.fujitsutask.enums.City} for delivery
+&nbsp;     * @param vehicleType the {@link kkadak.fujitsutask.enums.VehicleType} used for the delivery
+&nbsp;     * @param timestamp   the timestamp for the calculation data (measured in seconds past UTC epoch) or null
+&nbsp;     * @return the total delivery fee from extra fee rules
+&nbsp;     * @throws DeliveryFeeCalculationException in case of error
+&nbsp;     */
+&nbsp;    private double getExtraFee(City city, VehicleType vehicleType, Long timestamp)
+&nbsp;            throws DeliveryFeeCalculationException {
+&nbsp;        List&lt;ExtraFeeRule&gt; rules;
+&nbsp;        WeatherData weatherData;
+&nbsp;
+&nbsp;        // Get either most recent weather data and rules for now or for a specified timestamp
+<b class="fc">&nbsp;        if (timestamp == null) {</b>
+<b class="fc">&nbsp;            weatherData = weatherDataRepository</b>
+<b class="fc">&nbsp;                    .getTopByStationWmoOrderByTimestampDesc(WeatherStationTranslator.getWmoOfCity(city));</b>
+<b class="fc">&nbsp;            rules = extraFeeRuleRepository.getRules(vehicleType);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            weatherData = weatherDataRepository</b>
+<b class="fc">&nbsp;                    .getTopByStationWmoAndTimestampLessThanEqualOrderByTimestampDesc(WeatherStationTranslator</b>
+<b class="fc">&nbsp;                            .getWmoOfCity(city), timestamp);</b>
+<b class="fc">&nbsp;            rules = extraFeeRuleRepository.getRules(vehicleType, timestamp);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Handle weather data missing
+&nbsp;        // Only happens when the date selected is before the start of weather data gathering (initial application start)
+&nbsp;        // or when weather data source has been unavailable since initial application start
+<b class="fc">&nbsp;        if (weatherData == null) throw new DeliveryFeeCalculationException(&quot;No valid weather data recorded&quot;);</b>
+<b class="fc">&nbsp;        double extraFeeTotal = 0;</b>
+&nbsp;
+&nbsp;        // Calculate extra fees from numeric metrics
+<b class="fc">&nbsp;        for (ExtraFeeRuleMetric metric : ExtraFeeRuleMetric.values()) {</b>
+&nbsp;
+&nbsp;            // Skip phenomenon metric assessment
+<b class="fc">&nbsp;            if (metric == ExtraFeeRuleMetric.PHENOMENON) continue;</b>
+<b class="fc">&nbsp;            boolean applicableFromExists = false, applicableUntilExists = false;</b>
+<b class="fc">&nbsp;            Double fromRuleFeeTotal = null, untilRuleFeeTotal = null;</b>
+&nbsp;
+&nbsp;            // Process &#39;FROM&#39; rules in descending order of value
+<b class="fc">&nbsp;            for (ExtraFeeRule rule : rules.stream()</b>
+<b class="fc">&nbsp;                    .filter(rule -&gt; rule.getMetric() == metric &amp;&amp; rule.getValueType() == ExtraFeeRuleValueType.FROM)</b>
+<b class="fc">&nbsp;                    .sorted((o1, o2) -&gt; Double.compare(Double.parseDouble(o2.getValueStr()),</b>
+<b class="fc">&nbsp;                            Double.parseDouble(o1.getValueStr()))).toList()) {</b>
+&nbsp;
+&nbsp;                // If value in gathered data is higher than or equal to the rule&#39;s value
+<b class="fc">&nbsp;                if ((metric == ExtraFeeRuleMetric.AIRTEMP</b>
+<b class="nc">&nbsp;                            &amp;&amp; weatherData.getAirTemp() &gt;= Double.parseDouble(rule.getValueStr()))</b>
+&nbsp;                        || (metric == ExtraFeeRuleMetric.WINDSPEED
+<b class="fc">&nbsp;                            &amp;&amp; weatherData.getWindSpeed() &gt;= Double.parseDouble(rule.getValueStr()))) {</b>
+<b class="fc">&nbsp;                    applicableFromExists = true;</b>
+<b class="fc">&nbsp;                    fromRuleFeeTotal = rule.getFeeAmount();</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+&nbsp;            // Process &#39;UNTIL&#39; rules in ascending order of value
+<b class="fc">&nbsp;            for (ExtraFeeRule rule : rules.stream()</b>
+<b class="fc">&nbsp;                    .filter(rule -&gt; rule.getMetric() == metric &amp;&amp; rule.getValueType() == ExtraFeeRuleValueType.UNTIL)</b>
+<b class="fc">&nbsp;                    .sorted(Comparator.comparingDouble(o -&gt; Double.parseDouble(o.getValueStr()))).toList()) {</b>
+&nbsp;
+&nbsp;                // If value in gathered data is lower than or equal to the rule&#39;s value
+<b class="fc">&nbsp;                if ((metric == ExtraFeeRuleMetric.AIRTEMP</b>
+<b class="fc">&nbsp;                            &amp;&amp; weatherData.getAirTemp() &lt;= Double.parseDouble(rule.getValueStr()))</b>
+&nbsp;                        || (metric == ExtraFeeRuleMetric.WINDSPEED
+<b class="nc">&nbsp;                            &amp;&amp; weatherData.getWindSpeed() &lt;= Double.parseDouble(rule.getValueStr()))) {</b>
+<b class="fc">&nbsp;                    applicableUntilExists = true;</b>
+<b class="fc">&nbsp;                    untilRuleFeeTotal = rule.getFeeAmount();</b>
+<b class="fc">&nbsp;                    break;</b>
+&nbsp;                }
+<b class="nc">&nbsp;            }</b>
+&nbsp;
+<b class="fc">&nbsp;            if (applicableFromExists &amp;&amp; fromRuleFeeTotal == null || applicableUntilExists &amp;&amp; untilRuleFeeTotal == null)</b>
+<b class="nc">&nbsp;                throw new DeliveryFeeCalculationException(&quot;Usage of selected vehicle type is currently forbidden&quot;);</b>
+<b class="fc">&nbsp;            if (fromRuleFeeTotal != null) extraFeeTotal += fromRuleFeeTotal;</b>
+<b class="fc">&nbsp;            if (untilRuleFeeTotal != null) extraFeeTotal += untilRuleFeeTotal;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Calculate extra fees from phenomenon metric
+<b class="fc">&nbsp;        Optional&lt;ExtraFeeRule&gt; applicableRule = rules.stream()</b>
+<b class="fc">&nbsp;                .filter(rule -&gt; rule.getValueStr().equalsIgnoreCase(weatherData.getPhenomenon())).findFirst();</b>
+<b class="fc">&nbsp;        Double phenomenonFeeTotal = 0.0;</b>
+<b class="fc">&nbsp;        if (applicableRule.isPresent()) {</b>
+<b class="fc">&nbsp;            phenomenonFeeTotal = applicableRule.get().getFeeAmount();</b>
+<b class="fc">&nbsp;            if (phenomenonFeeTotal == null)</b>
+<b class="nc">&nbsp;                throw new DeliveryFeeCalculationException(&quot;Usage of selected vehicle type is currently forbidden&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        extraFeeTotal += phenomenonFeeTotal;</b>
+<b class="fc">&nbsp;        return extraFeeTotal;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-03-17 14:17</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,455 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=windows-1252"> 
+  <title>Coverage Report > DeliveryController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kkadak.fujitsutask.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: DeliveryController (kkadak.fujitsutask.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">DeliveryController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    70.5%
+  </span>
+  <span class="absValue">
+    (110/156)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kkadak.fujitsutask.controller;
+&nbsp;
+&nbsp;import kkadak.fujitsutask.enums.City;
+&nbsp;import kkadak.fujitsutask.enums.ExtraFeeRuleMetric;
+&nbsp;import kkadak.fujitsutask.enums.ExtraFeeRuleValueType;
+&nbsp;import kkadak.fujitsutask.enums.VehicleType;
+&nbsp;import kkadak.fujitsutask.initializers.FeeRuleInitializer;
+&nbsp;import kkadak.fujitsutask.model.BaseFeeRule;
+&nbsp;import kkadak.fujitsutask.model.ExtraFeeRule;
+&nbsp;import kkadak.fujitsutask.repository.BaseFeeRuleRepository;
+&nbsp;import kkadak.fujitsutask.repository.ExtraFeeRuleRepository;
+&nbsp;import kkadak.fujitsutask.service.DeliveryServiceImpl;
+&nbsp;import kkadak.fujitsutask.translators.StringEnumTranslator;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.web.bind.annotation.GetMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestParam;
+&nbsp;import org.springframework.web.bind.annotation.RestController;
+&nbsp;
+&nbsp;import java.time.Instant;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;/**
+&nbsp; * REST controller for the delivery fee calculation and rules management
+&nbsp; */
+&nbsp;@RestController
+&nbsp;public class DeliveryController {
+&nbsp;    private final DeliveryServiceImpl deliveryService;
+&nbsp;    private final FeeRuleInitializer feeRuleInitializer;
+&nbsp;    private final BaseFeeRuleRepository baseFeeRuleRepository;
+&nbsp;    private final ExtraFeeRuleRepository extraFeeRuleRepository;
+&nbsp;
+&nbsp;    @Autowired
+&nbsp;    public DeliveryController(DeliveryServiceImpl deliveryService,
+&nbsp;                              FeeRuleInitializer feeRuleInitializer,
+&nbsp;                              BaseFeeRuleRepository baseFeeRuleRepository,
+<b class="fc">&nbsp;                              ExtraFeeRuleRepository extraFeeRuleRepository) {</b>
+<b class="fc">&nbsp;        this.deliveryService = deliveryService;</b>
+<b class="fc">&nbsp;        this.feeRuleInitializer = feeRuleInitializer;</b>
+<b class="fc">&nbsp;        this.baseFeeRuleRepository = baseFeeRuleRepository;</b>
+<b class="fc">&nbsp;        this.extraFeeRuleRepository = extraFeeRuleRepository;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * REST endpoint handler for delivery fee calculation and rule management
+&nbsp;     *
+&nbsp;     * @param modeStr      optional parameter to specify action mode for rule management,
+&nbsp;     *                     in case missing, default fee calculation is assumed, valid options are:
+&nbsp;     *                     &quot;reset&quot;, &quot;print&quot;, &quot;history&quot;, &quot;disable&quot;, &quot;add&quot;
+&nbsp;     * @param idStr        specifies the ID of the rule to be removed in case modeStr is set to &quot;disable&quot;
+&nbsp;     * @param typeStr      specifies the type of rule to be added in case modeStr is set to &quot;add&quot;,
+&nbsp;     *                     valid options are: &quot;base&quot;, &quot;from&quot;, &quot;until&quot;, &quot;phenomenon&quot;,
+&nbsp;     *                     translated to {@link kkadak.fujitsutask.enums.ExtraFeeRuleValueType} in case of extra fee
+&nbsp;     *                     using {@link kkadak.fujitsutask.translators.StringEnumTranslator}
+&nbsp;     * @param metricStr    specifies the metric for which the rule to be added applies,
+&nbsp;     *                     translated to {@link kkadak.fujitsutask.enums.ExtraFeeRuleMetric}
+&nbsp;     *                     using {@link kkadak.fujitsutask.translators.StringEnumTranslator}
+&nbsp;     * @param valueStr     the value from/until/to which the rule to be added applies
+&nbsp;     * @param amountStr    the fee amount for the rule to be added
+&nbsp;     * @param cityStr      the city for the price calculation or in which the base rule to be added applies,
+&nbsp;     *                     translated to {@link kkadak.fujitsutask.enums.City}
+&nbsp;     *                     using {@link kkadak.fujitsutask.translators.StringEnumTranslator}
+&nbsp;     * @param vehicleStr   the vehicle for the price calculation or for which rule to be added applies,
+&nbsp;     *                     translated to {@link kkadak.fujitsutask.enums.VehicleType}
+&nbsp;     *                     using {@link kkadak.fujitsutask.translators.StringEnumTranslator}
+&nbsp;     * @param timestampStr the timestamp to be used in case a query is made for the past, measured in seconds past epoch
+&nbsp;     * @return the response output, delivery fee calculation result in case mode is unset
+&nbsp;     * or other output in case of rule management
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/getFee&quot;)
+&nbsp;    public String getFee(@RequestParam(value = &quot;mode&quot;, required = false) String modeStr,
+&nbsp;                         @RequestParam(value = &quot;id&quot;, required = false) String idStr,
+&nbsp;                         @RequestParam(value = &quot;type&quot;, required = false) String typeStr,
+&nbsp;                         @RequestParam(value = &quot;metric&quot;, required = false) String metricStr,
+&nbsp;                         @RequestParam(value = &quot;value&quot;, required = false) String valueStr,
+&nbsp;                         @RequestParam(value = &quot;amount&quot;, required = false) String amountStr,
+&nbsp;                         @RequestParam(value = &quot;city&quot;, required = false) String cityStr,
+&nbsp;                         @RequestParam(value = &quot;vehicle&quot;, required = false) String vehicleStr,
+&nbsp;                         @RequestParam(value = &quot;time&quot;, required = false) String timestampStr) {
+<b class="fc">&nbsp;        City selectedCity = City.UNKNOWN;</b>
+<b class="fc">&nbsp;        VehicleType selectedVehicle = VehicleType.UNKNOWN;</b>
+&nbsp;
+&nbsp;        // Translate cityStr
+<b class="fc">&nbsp;        if (cityStr != null) {</b>
+<b class="fc">&nbsp;            selectedCity = StringEnumTranslator.getCityFromStr(cityStr);</b>
+<b class="fc">&nbsp;            if (selectedCity == City.UNKNOWN) return &quot;Unknown value for &#39;city&#39; parameter&quot;;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Translate vehicleStr
+<b class="fc">&nbsp;        if (vehicleStr != null) {</b>
+<b class="fc">&nbsp;            selectedVehicle = StringEnumTranslator.getVehicleTypeFromStr(vehicleStr);</b>
+<b class="fc">&nbsp;            if (selectedVehicle == VehicleType.UNKNOWN) return &quot;Unknown value for &#39;vehicle&#39; parameter&quot;;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Handle modeStr
+<b class="fc">&nbsp;        if (modeStr != null) {</b>
+&nbsp;            // Calculation rules reset to default values
+<b class="fc">&nbsp;            if (modeStr.equals(&quot;reset&quot;)) {</b>
+<b class="fc">&nbsp;                feeRuleInitializer.InitializeDefaultRules();</b>
+<b class="fc">&nbsp;                return &quot;The fee rules were reset&quot;;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // Print current calculation rules
+<b class="fc">&nbsp;            if (modeStr.equals(&quot;print&quot;)) {</b>
+<b class="fc">&nbsp;                String result = &quot;&quot;;</b>
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;h3&gt;BASE FEES&lt;/h3&gt;&lt;table style=\&quot;border-spacing:10px\&quot;&gt;&lt;tr&gt;&lt;th&gt;&lt;/th&gt;&quot;);</b>
+&nbsp;
+&nbsp;                // Add table headers
+<b class="fc">&nbsp;                for (VehicleType vehicleType : VehicleType.values()) {</b>
+<b class="fc">&nbsp;                    if (vehicleType == VehicleType.UNKNOWN) continue;</b>
+<b class="fc">&nbsp;                    result = result.concat(String.format(&quot;&lt;th&gt;%s&lt;/th&gt;&quot;,</b>
+<b class="fc">&nbsp;                            StringEnumTranslator.getStrFromVehicleType(vehicleType)));</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;/tr&gt;&quot;);</b>
+&nbsp;
+&nbsp;                // Iterate over every valid city and vehicle type
+<b class="fc">&nbsp;                for (City city : City.values()) {</b>
+<b class="fc">&nbsp;                    if (city == City.UNKNOWN) continue;</b>
+&nbsp;
+<b class="fc">&nbsp;                    result = result.concat(&quot;&lt;tr&gt;&lt;td&gt;&lt;b&gt;&quot; + StringEnumTranslator.getStrFromCity(city) + &quot;&lt;/b&gt;&lt;/td&gt;&quot;);</b>
+<b class="fc">&nbsp;                    for (VehicleType vehicleType : VehicleType.values()) {</b>
+<b class="fc">&nbsp;                        if (vehicleType == VehicleType.UNKNOWN) continue;</b>
+&nbsp;
+<b class="fc">&nbsp;                        Optional&lt;BaseFeeRule&gt; rule = baseFeeRuleRepository</b>
+<b class="fc">&nbsp;                                .findTopByCityAndVehicleTypeOrderByValidFromTimestampDesc(city, vehicleType);</b>
+&nbsp;
+&nbsp;                        // Add table data field
+<b class="fc">&nbsp;                        if (rule.isPresent() &amp;&amp; rule.get().getFeeAmount() != null)</b>
+<b class="nc">&nbsp;                            result = result.concat(String.format(&quot;&lt;td&gt;%.2f&lt;/td&gt;&quot;, rule.get().getFeeAmount()));</b>
+&nbsp;
+<b class="fc">&nbsp;                        else result = result.concat(&quot;&lt;td&gt;-&lt;/td&gt;&quot;);</b>
+&nbsp;                    }
+&nbsp;
+<b class="fc">&nbsp;                    result = result.concat(&quot;&lt;/tr&gt;&quot;);</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;/table&gt;&lt;br&gt;&quot;);</b>
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;h3&gt;EXTRA FEES&lt;/h3&gt;&lt;table style=\&quot;border-spacing:10px\&quot;&gt;&quot;</b>
+&nbsp;                        + &quot;&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;vehicle type&lt;/th&gt;&lt;th&gt;condition&lt;/th&gt;&lt;th&gt;fee&lt;/th&gt;&lt;/tr&gt;&quot;);
+&nbsp;
+&nbsp;                // Iterate over every vehicle type, getting the currently valid rules for that type
+<b class="fc">&nbsp;                for (VehicleType vehicleType : VehicleType.values()) {</b>
+<b class="fc">&nbsp;                    if (vehicleType == VehicleType.UNKNOWN) continue;</b>
+&nbsp;
+<b class="fc">&nbsp;                    for (ExtraFeeRule rule : extraFeeRuleRepository.getRules(vehicleType)) {</b>
+<b class="nc">&nbsp;                        result = result.concat(String.format(&quot;&lt;tr&gt;&lt;td&gt;%d&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&quot;,</b>
+<b class="nc">&nbsp;                                rule.getId(), StringEnumTranslator.getStrFromVehicleType(rule.getVehicleType())));</b>
+&nbsp;
+<b class="nc">&nbsp;                        if (rule.getMetric() != ExtraFeeRuleMetric.PHENOMENON)</b>
+<b class="nc">&nbsp;                            result = result.concat(String.format(&quot;&lt;td&gt;%s %s %.2f&lt;/td&gt;&quot;,</b>
+<b class="nc">&nbsp;                                    rule.getMetric().name().toLowerCase(), rule.getValueType().name().toLowerCase(),</b>
+<b class="nc">&nbsp;                                    Double.parseDouble(rule.getValueStr())));</b>
+<b class="nc">&nbsp;                        else result = result.concat(String.format(&quot;&lt;td&gt;%s&lt;/td&gt;&quot;, rule.getValueStr()));</b>
+&nbsp;
+<b class="nc">&nbsp;                        Double amount = rule.getFeeAmount();</b>
+<b class="nc">&nbsp;                        if (amount == null) result = result.concat(&quot;&lt;td&gt;&lt;b&gt;forbidden&lt;/b&gt;&lt;/td&gt;&quot;);</b>
+<b class="nc">&nbsp;                        else result = result.concat(String.format(&quot;&lt;td&gt;%.2f&lt;/td&gt;&quot;, amount));</b>
+&nbsp;
+<b class="nc">&nbsp;                        result = result.concat(&quot;&lt;/tr&gt;&quot;);</b>
+<b class="nc">&nbsp;                    }</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;/table&gt;&quot;);</b>
+<b class="fc">&nbsp;                return result;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // Print history of fee rules
+<b class="fc">&nbsp;            if (modeStr.equals(&quot;history&quot;)) {</b>
+<b class="fc">&nbsp;                String result = &quot;&quot;;</b>
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;h3&gt;BASE FEES&lt;/h3&gt;&lt;table style=\&quot;border-spacing:10px\&quot;&gt;&quot;</b>
+&nbsp;                        + &quot;&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;city&lt;/th&gt;&lt;th&gt;vehicle type&lt;/th&gt;&lt;th&gt;valid from&lt;/th&gt;&lt;th&gt;fee&lt;/th&gt;&lt;/tr&gt;&quot;);
+<b class="fc">&nbsp;                List&lt;BaseFeeRule&gt; baseFeeRuleHistory = baseFeeRuleRepository.findByOrderByValidFromTimestampDesc();</b>
+&nbsp;
+&nbsp;                // Iterate over every base fee rule
+<b class="fc">&nbsp;                for (BaseFeeRule rule : baseFeeRuleHistory) {</b>
+<b class="nc">&nbsp;                    result = result.concat(String.format(&quot;&lt;tr&gt;&lt;td&gt;%d&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&lt;td&gt;%d&lt;/td&gt;&quot;,</b>
+<b class="nc">&nbsp;                            rule.getId(), StringEnumTranslator.getStrFromCity(rule.getCity()),</b>
+<b class="nc">&nbsp;                            StringEnumTranslator.getStrFromVehicleType(rule.getVehicleType()),</b>
+<b class="nc">&nbsp;                            rule.getValidFromTimestamp()));</b>
+&nbsp;
+<b class="nc">&nbsp;                    Double amount = rule.getFeeAmount();</b>
+<b class="nc">&nbsp;                    if (amount == null) result = result.concat(&quot;&lt;td&gt;&lt;b&gt;forbidden&lt;/b&gt;&lt;/td&gt;&quot;);</b>
+<b class="nc">&nbsp;                    else result = result.concat(String.format(&quot;&lt;td&gt;%.2f&lt;/td&gt;&quot;, amount));</b>
+<b class="nc">&nbsp;                    result = result.concat(&quot;&lt;/tr&gt;&quot;);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;/table&gt;&lt;br&gt;&quot;);</b>
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;h3&gt;EXTRA FEES&lt;/h3&gt;&lt;table style=\&quot;border-spacing:10px\&quot;&gt;&quot;</b>
+&nbsp;                        + &quot;&lt;tr&gt;&lt;th&gt;ID&lt;/th&gt;&lt;th&gt;vehicle type&lt;/th&gt;&lt;th&gt;condition&lt;/th&gt;&quot;
+&nbsp;                        + &quot;&lt;th&gt;valid from&lt;/th&gt;&lt;th&gt;valid until&lt;/th&gt;&lt;th&gt;fee&lt;/th&gt;&lt;/tr&gt;&quot;);
+<b class="fc">&nbsp;                List&lt;ExtraFeeRule&gt; extraFeeRuleHistory = extraFeeRuleRepository.findByOrderByValidFromTimestampDesc();</b>
+&nbsp;
+&nbsp;                // Iterate over every base fee rule
+<b class="fc">&nbsp;                for (ExtraFeeRule rule : extraFeeRuleHistory) {</b>
+<b class="nc">&nbsp;                    result = result.concat(String.format(&quot;&lt;tr&gt;&lt;td&gt;%d&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&quot;,</b>
+<b class="nc">&nbsp;                            rule.getId(), StringEnumTranslator.getStrFromVehicleType(rule.getVehicleType())));</b>
+&nbsp;
+<b class="nc">&nbsp;                    if (rule.getMetric() != ExtraFeeRuleMetric.PHENOMENON)</b>
+<b class="nc">&nbsp;                        result = result.concat(String.format(&quot;&lt;td&gt;%s %s %.2f&lt;/td&gt;&quot;,</b>
+<b class="nc">&nbsp;                                rule.getMetric().name().toLowerCase(), rule.getValueType().name().toLowerCase(),</b>
+<b class="nc">&nbsp;                                Double.parseDouble(rule.getValueStr())));</b>
+<b class="nc">&nbsp;                    else result = result.concat(String.format(&quot;&lt;td&gt;%s&lt;/td&gt;&quot;, rule.getValueStr()));</b>
+&nbsp;
+<b class="nc">&nbsp;                    result = result.concat(String.format(&quot;&lt;td&gt;%d&lt;/td&gt;&quot;, rule.getValidFromTimestamp()));</b>
+&nbsp;
+<b class="nc">&nbsp;                    if (rule.getValidUntilTimestamp() != null)</b>
+<b class="nc">&nbsp;                        result = result.concat(String.format(&quot;&lt;td&gt;%d&lt;/td&gt;&quot;, rule.getValidUntilTimestamp()));</b>
+<b class="nc">&nbsp;                    else result = result.concat(&quot;&lt;td&gt;&lt;b&gt;now&lt;/b&gt;&lt;/td&gt;&quot;);</b>
+&nbsp;
+<b class="nc">&nbsp;                    Double amount = rule.getFeeAmount();</b>
+<b class="nc">&nbsp;                    if (amount == null) result = result.concat(&quot;&lt;td&gt;&lt;b&gt;forbidden&lt;/b&gt;&lt;/td&gt;&quot;);</b>
+<b class="nc">&nbsp;                    else result = result.concat(String.format(&quot;&lt;td&gt;%.2f&lt;/td&gt;&quot;, amount));</b>
+&nbsp;
+<b class="nc">&nbsp;                    result = result.concat(&quot;&lt;/tr&gt;&quot;);</b>
+<b class="nc">&nbsp;                }</b>
+&nbsp;
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;/table&gt;&lt;br&gt;&quot;);</b>
+<b class="fc">&nbsp;                result = result.concat(&quot;&lt;/table&gt;&quot;);</b>
+<b class="fc">&nbsp;                return result;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // Disable rule with ID of ruleId
+<b class="fc">&nbsp;            if (modeStr.equals(&quot;disable&quot;)) {</b>
+&nbsp;                long ruleId;
+&nbsp;
+&nbsp;                try {
+<b class="fc">&nbsp;                    ruleId = Long.parseLong(idStr);</b>
+<b class="fc">&nbsp;                } catch (Exception e) {</b>
+<b class="fc">&nbsp;                    return &quot;Unknown value for &#39;id&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;
+<b class="fc">&nbsp;                Optional&lt;ExtraFeeRule&gt; rule = extraFeeRuleRepository.findById(ruleId);</b>
+<b class="fc">&nbsp;                if (rule.isPresent()) {</b>
+<b class="fc">&nbsp;                    if (rule.get().getValidUntilTimestamp() != null) return &quot;Rule already disabled&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;                    rule.get().setValidUntilTimestamp(Instant.now().getEpochSecond());</b>
+<b class="fc">&nbsp;                    extraFeeRuleRepository.save(rule.get());</b>
+<b class="fc">&nbsp;                    return &quot;Rule disabled&quot;;</b>
+&nbsp;                }
+&nbsp;
+<b class="fc">&nbsp;                return &quot;Rule not found&quot;;</b>
+&nbsp;            }
+&nbsp;
+&nbsp;            // Add a rule
+<b class="fc">&nbsp;            if (modeStr.equals(&quot;add&quot;)) {</b>
+&nbsp;
+&nbsp;                // Input validation
+<b class="fc">&nbsp;                if (selectedVehicle == VehicleType.UNKNOWN) return &quot;Specify &#39;vehicle&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                if (typeStr == null) return &quot;Specify &#39;type&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                if (amountStr == null) return &quot;Specify &#39;amount&#39; parameter&quot;;</b>
+&nbsp;
+<b class="fc">&nbsp;                switch (typeStr.toLowerCase()) {</b>
+&nbsp;                    // Adding a base fee rule
+&nbsp;                    case &quot;base&quot;:
+<b class="fc">&nbsp;                        if (selectedCity == City.UNKNOWN) return &quot;Specify &#39;city&#39; parameter&quot;;</b>
+&nbsp;
+&nbsp;                        try {
+<b class="fc">&nbsp;                            if (amountStr.equalsIgnoreCase(&quot;forbid&quot;))</b>
+<b class="fc">&nbsp;                                feeRuleInitializer.InitializeNewRule(selectedCity, selectedVehicle, null);</b>
+&nbsp;                            else
+<b class="fc">&nbsp;                                feeRuleInitializer.InitializeNewRule(selectedCity,</b>
+<b class="fc">&nbsp;                                        selectedVehicle, Double.parseDouble(amountStr));</b>
+&nbsp;
+<b class="fc">&nbsp;                            return &quot;Rule added&quot;;</b>
+<b class="nc">&nbsp;                        } catch (Exception e) {</b>
+<b class="nc">&nbsp;                            return e.getMessage();</b>
+&nbsp;                        }
+&nbsp;
+&nbsp;                    // Adding a numerical value extra fee rule
+&nbsp;                    case &quot;from&quot;:
+&nbsp;                    case &quot;until&quot;:
+<b class="fc">&nbsp;                        ExtraFeeRuleMetric metric = StringEnumTranslator.getMetricFromStr(metricStr);</b>
+<b class="fc">&nbsp;                        ExtraFeeRuleValueType valueType = StringEnumTranslator.getValueTypeFromStr(typeStr);</b>
+<b class="fc">&nbsp;                        if (metric == ExtraFeeRuleMetric.UNKNOWN) return &quot;Unknown value for &#39;metric&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                        if (valueType == ExtraFeeRuleValueType.UNKNOWN) return &quot;Unknown value for &#39;type&#39; parameter&quot;;</b>
+&nbsp;
+&nbsp;                        try {
+&nbsp;                            double value;
+&nbsp;                            try {
+<b class="fc">&nbsp;                                value = Double.parseDouble(valueStr);</b>
+<b class="fc">&nbsp;                            } catch (Exception e) {</b>
+<b class="fc">&nbsp;                                return &quot;Unknown value for &#39;value&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                            }</b>
+&nbsp;
+<b class="fc">&nbsp;                            if (amountStr.equalsIgnoreCase(&quot;forbid&quot;))</b>
+<b class="fc">&nbsp;                                feeRuleInitializer.InitializeNewRule(metric, valueType, value,</b>
+&nbsp;                                        selectedVehicle, null);
+&nbsp;                            else
+<b class="fc">&nbsp;                                feeRuleInitializer.InitializeNewRule(metric, valueType, value,</b>
+<b class="fc">&nbsp;                                        selectedVehicle, Double.parseDouble(amountStr));</b>
+&nbsp;
+<b class="fc">&nbsp;                            return &quot;Rule added&quot;;</b>
+<b class="nc">&nbsp;                        } catch (Exception e) {</b>
+<b class="nc">&nbsp;                            return e.getMessage();</b>
+&nbsp;                        }
+&nbsp;
+&nbsp;                    // Adding a String value extra fee rule
+&nbsp;                    case &quot;phenomenon&quot;:
+<b class="fc">&nbsp;                        if (valueStr == null) return &quot;Specify &#39;value&#39; parameter&quot;;</b>
+&nbsp;
+&nbsp;                        try {
+<b class="fc">&nbsp;                            if (amountStr.equalsIgnoreCase(&quot;forbid&quot;))</b>
+<b class="fc">&nbsp;                                feeRuleInitializer.InitializeNewRule(valueStr, selectedVehicle, null);</b>
+&nbsp;                            else {
+&nbsp;                                double amount;
+&nbsp;                                try {
+<b class="fc">&nbsp;                                    amount = Double.parseDouble(amountStr);</b>
+<b class="fc">&nbsp;                                } catch (Exception e) {</b>
+<b class="fc">&nbsp;                                    return &quot;Unknown value for &#39;amount&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                                }</b>
+&nbsp;
+<b class="fc">&nbsp;                                feeRuleInitializer.InitializeNewRule(valueStr, selectedVehicle, amount);</b>
+&nbsp;                            }
+&nbsp;
+<b class="fc">&nbsp;                            return &quot;Rule added&quot;;</b>
+<b class="nc">&nbsp;                        } catch (Exception e) {</b>
+<b class="nc">&nbsp;                            return e.getMessage();</b>
+&nbsp;                        }
+&nbsp;
+&nbsp;                    default:
+<b class="fc">&nbsp;                        return &quot;Unknown value for &#39;type&#39; parameter&quot;;</b>
+&nbsp;                }
+&nbsp;            }
+&nbsp;
+<b class="fc">&nbsp;            return &quot;Unknown value for &#39;mode&#39; parameter&quot;;</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        // Input validation
+<b class="fc">&nbsp;        if (selectedCity == City.UNKNOWN) return &quot;Specify &#39;city&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;        if (selectedVehicle == VehicleType.UNKNOWN) return &quot;Specify &#39;vehicle&#39; parameter&quot;;</b>
+&nbsp;
+&nbsp;        // Handle delivery fee calculation
+&nbsp;        try {
+<b class="fc">&nbsp;            if (timestampStr != null) {</b>
+&nbsp;                long timestamp;
+&nbsp;
+&nbsp;                try {
+<b class="fc">&nbsp;                    timestamp = Long.parseLong(timestampStr);</b>
+<b class="fc">&nbsp;                } catch (Exception e) {</b>
+<b class="fc">&nbsp;                    return &quot;Unknown value for &#39;time&#39; parameter&quot;;</b>
+<b class="fc">&nbsp;                }</b>
+&nbsp;
+<b class="fc">&nbsp;                return String.format(&quot;%.2f&quot;, deliveryService.getDeliveryFee(selectedCity, selectedVehicle, timestamp));</b>
+&nbsp;            }
+<b class="fc">&nbsp;            else return String.format(&quot;%.2f&quot;, deliveryService.getDeliveryFee(selectedCity, selectedVehicle));</b>
+<b class="nc">&nbsp;        } catch (Exception e) {</b>
+<b class="nc">&nbsp;            return e.getMessage();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2024-03-17 14:17</div>
+</div>
+</body>
+</html>
